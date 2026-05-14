@@ -1,58 +1,107 @@
-# FAIMDL 2026 - Reinforcement Learning Project
+# Starting code for course project of FAIML - 01VSDWS
 
-Public repository for the group project of Fundamentals of Artificial Intelligence, Machine and Deep Learning at Politecnico di Torino, AY 2025/2026.
+Official assignment at [Google Doc](https://docs.google.com/document/d/1AXgLXux3l69vDAPLL-UYD3luFOw3JbyR-pLCS2yuNZk/edit?usp=sharing)
 
-The project focuses on Reinforcement Learning for robotic control, sim-to-real transfer, and Domain Randomization.
+## Getting started
 
-## Project objectives
+Before starting to implement your own code, make sure to:
+1. read and study the material provided (see Section 1 of the assignment)
+2. read the documentation of the main packages you will be using ([Gymnasium](https://gymnasium.farama.org), [stable-baselines3](https://stable-baselines3.readthedocs.io/en/master/index.html))
+3. play around with the code in the template to familiarize with all the tools. Especially with the `test_random_policy.py` script.
 
-The work is organized into four main steps:
 
-1. Familiarize with the core concepts of Reinforcement Learning.
-2. Implement simple Reinforcement Learning algorithms.
-3. Use state-of-the-art RL algorithms to solve a robotic task.
-4. Implement Domain Randomization in a robotic environment.
+### 1. Local
 
-Expected implementation:
+if you have a Linux system, you can work on the course project directly on your local machine. By doing so, you will also be able to render the Mujoco Hopper environment and visualize what is happening.
+We highly suggest using Conda to manage the environment.
 
-- REINFORCE with baseline.
-- Actor-Critic.
-- PPO and SAC with Stable-Baselines3.
-- MuJoCo or Gymnasium robotic environments.
-- PandaPush goal-conditioned task.
-- Uniform Domain Randomization and optional Automatic Domain Randomization.
+**Dependencies**
+- Run `pip install -r requirements.txt`
 
-## Repository structure
+Check your installation by launching `python part1/test_random_policy.py` from the repository root, or `cd part1 && python test_random_policy.py`.
 
-- src: source code.
-- configs: experiment configurations.
-- scripts: launch scripts.
-- notebooks: exploratory notebooks.
-- results: generated plots, logs, and evaluation outputs.
-- models: saved trained models.
-- report: report-related material.
 
-## Setup
+### 2. Google Colab
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
+You can also run the code on [Google Colab](https://colab.research.google.com/)
 
-## Example commands
+- Download all files contained in the `colab_template` folder in this repo (inside phase_1 folder).
+- Load the `test_random_policy.ipynb` file on [https://colab.research.google.com/](colab) and follow the instructions on it.
+
+NOTE 1: rendering is currently **not** officially supported on Colab, making it hard to see the simulator in action. We recommend that each group manages to play around with the visual interface of the simulator at least once, to best understand what is going on with the underlying Hopper environment.
+
+NOTE 2: you need to stay connected to the Google Colab interface at all times for your python scripts to keep training.
+
+## 3. Extra step for Push task
+To train on the panda-gym task you have to follow these steps first:
 
 ```bash
-python src/reinforce.py --config configs/hopper.yaml
-python src/actor_critic.py --config configs/hopper.yaml
-python src/train_sb3.py --config configs/panda_push.yaml --algo ppo
-python src/train_sb3.py --config configs/panda_push.yaml --algo sac --domain-randomization uniform
+cd part2/panda-gym
+pip install -e .
 ```
 
-## Submission reminder
+## Project structure
 
-The final submission requires a public GitHub repository and a PDF report. The repository link must be included at the end of the abstract in the report. After the submission deadline, the code should not be modified.
+```
+FAIML-RL-26/
+├── README.md
+├── requirements.txt
+├── part1/ <-- about Hopper
+│   ├── agent.py
+│   ├── test_random_policy.py
+│   ├── train.py
+│   └── colab_template/
+│       └── test_random_policy.ipynb
+└── part2/ <-- about PushTask
+    ├── eval_sb3.py
+    ├── rand_wrapper.py <-- randomization wrapper for UDR/ADR
+    ├── test_random_policy.py
+    ├── train_sb3.py
+    └── panda-gym/
+        └── panda_gym/ (main package)
+            └── envs/
+                ├── core.py
+                ├── panda_tasks.py
+                ├── robots/
+                │   └── panda.py
+                └── tasks/
+                    ├── flip.py
+                    ├── pick_and_place.py
+                    ├── push.py <-- you will use this environment
+                    ├── reach.py
+                    ├── slide.py
+                    └── stack.py
+        
+```
 
-## Authors
+---
 
-Group members to be added.
+## Quick validation checklist
+
+Before launching long experiments, run these commands from the repository root:
+
+```bash
+python -m py_compile part1/*.py part2/*.py
+python part1/analyze_hopper.py
+cd part2/panda-gym && pip install -e . && cd ../..
+python part2/inspect_push.py --env-type both
+python part2/run_part2_experiments.py --algorithm sac --include-udr --include-adr --dry-run
+```
+
+The long training runs are intentionally not included in the repository. Results, plots, and final paper tables must be generated by the group on the final execution environment.
+
+## Current completion status
+
+This copy now includes the complete implementation up to **Phase 4 included**.
+
+- Phase 1/2: Hopper, REINFORCE, REINFORCE + baseline, Actor-Critic. See `PHASE_1_2_COMPLETED.md`.
+- Phase 3/4: PandaPush PPO/SAC baselines, lower/upper bound evaluations, UDR, ADR. See `PHASE_3_4_COMPLETED.md`.
+
+Main Phase 3/4 entry points:
+
+```bash
+python part2/inspect_push.py --env-type both
+python part2/train_sb3.py --algorithm sac --env-type source --sampling-strategy none
+python part2/eval_sb3.py --algorithm sac --model-path results/part2/<run>/final_model.zip --env-type target --episodes 50
+python part2/run_part2_experiments.py --algorithm sac --include-udr --include-adr
+```

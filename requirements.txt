@@ -1,7 +1,10 @@
+gymnasium[mujoco]
+mujoco
+numpy<2
 torch
-gymnasium
-stable-baselines3
-numpy
 matplotlib
-tqdm
-pyyaml
+stable-baselines3[extra]>=2.0.0
+pybullet
+scipy
+imageio
+opencv-python<4
