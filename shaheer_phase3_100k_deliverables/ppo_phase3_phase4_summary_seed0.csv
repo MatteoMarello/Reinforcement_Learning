@@ -1,0 +1,4 @@
+timestamp,label,model_path,algorithm,env_type,sampling_strategy,episodes,mean_return,std_return,min_return,max_return,mean_length,std_length,success_rate
+2026-05-19 00:20:32,source_to_source,results/part2/ppo_none_source_100k_seed0/final_model.zip,ppo,source,none,50,-3.4398576997593047,2.188209464556177,-6.57821798324585,-0.01109199970960617,37.26,21.49307795547208,0.26
+2026-05-19 00:20:39,source_to_target_lower_bound,results/part2/ppo_none_source_100k_seed0/final_model.zip,ppo,target,none,50,-3.766186599805951,1.625169828558496,-6.730568841099739,-0.025908000767230988,44.12,15.923115273086482,0.12
+2026-05-19 00:20:46,target_to_target_upper_bound,results/part2/ppo_none_target_100k_seed0/final_model.zip,ppo,target,none,50,-3.7593285274133086,2.120838788558904,-6.531648829579353,-0.012051999568939209,39.22,20.29806887366382,0.22
