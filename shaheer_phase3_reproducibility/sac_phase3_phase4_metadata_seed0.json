@@ -1,0 +1,11 @@
+{
+  "algorithm": "sac",
+  "episodes": 50,
+  "mass_range": [
+    0.5,
+    8.0
+  ],
+  "seed": 0,
+  "summary_csv": "results/part2/summaries/sac_phase3_phase4_summary_seed0.csv",
+  "timesteps": 500000
+}
