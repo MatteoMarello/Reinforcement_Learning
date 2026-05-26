@@ -1,0 +1,38 @@
+Phase 4 Domain Randomization Notes - Umesh
+
+Algorithm: SAC
+Timesteps: 500000
+Evaluation episodes: 50
+Seed: 0
+
+Source cube mass: 1.0 kg
+Target cube mass: 5.0 kg
+
+Final 500k / 50-episode results:
+
+Source to target baseline:
+mean return = -2.7273
+success rate = 0.50
+
+Target to target upper bound:
+mean return = -0.4165
+success rate = 1.00
+
+UDR source to target:
+mean return = -0.5017
+success rate = 1.00
+
+ADR source to target:
+mean return = -1.9204
+success rate = 0.66
+
+Conclusion:
+UDR gave the best transfer performance in Phase 4. It improved the source-to-target success rate from 0.50 to 1.00 and achieved performance close to the target-to-target upper bound.
+
+ADR also improved over the source-to-target baseline, but it was weaker than UDR in this run. A possible explanation is that the adaptive randomization range did not expand quickly or effectively enough, while UDR exposed the policy to a wider fixed range of cube masses during training.
+
+Files produced:
+- sac_phase3_phase4_summary_seed0.csv
+- final plot PNG
+- sac_udr_source_500k_seed0 result folder
+- sac_adr_source_500k_seed0 result folder
