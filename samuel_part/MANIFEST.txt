@@ -1,0 +1,5 @@
+samuel_part package
+- results/: copied raw outputs for quick/short/long runs
+- logs/: stdout logs from the long and 1000-episode runs plus Hopper analysis artifacts
+- plots/: regenerated global comparison plots from cleaned logs
+- reports/: consolidated metrics, hyperparameters, and the English final notes

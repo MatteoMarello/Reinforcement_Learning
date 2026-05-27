@@ -1,0 +1,70 @@
+{
+    "env_id": "Hopper-v4",
+    "observation_space": "Box(-inf, inf, (11,), float64)",
+    "observation_shape": [
+        11
+    ],
+    "action_space": "Box(-1.0, 1.0, (3,), float32)",
+    "action_shape": [
+        3
+    ],
+    "action_low": [
+        -1.0,
+        -1.0,
+        -1.0
+    ],
+    "action_high": [
+        1.0,
+        1.0,
+        1.0
+    ],
+    "nq_position_coordinates": 6,
+    "nv_degrees_of_freedom": 6,
+    "nu_actuators": 3,
+    "bodies": [
+        {
+            "body_id": 0,
+            "body_name": "world",
+            "mass": 0.0,
+            "dof_count": 0
+        },
+        {
+            "body_id": 1,
+            "body_name": "torso",
+            "mass": 3.6651914291880923,
+            "dof_count": 3
+        },
+        {
+            "body_id": 2,
+            "body_name": "thigh",
+            "mass": 4.057890510886818,
+            "dof_count": 1
+        },
+        {
+            "body_id": 3,
+            "body_name": "leg",
+            "mass": 2.7813566959781637,
+            "dof_count": 1
+        },
+        {
+            "body_id": 4,
+            "body_name": "foot",
+            "mass": 5.315574769873931,
+            "dof_count": 1
+        }
+    ],
+    "actuator_ctrlrange": [
+        [
+            -1.0,
+            1.0
+        ],
+        [
+            -1.0,
+            1.0
+        ],
+        [
+            -1.0,
+            1.0
+        ]
+    ]
+}

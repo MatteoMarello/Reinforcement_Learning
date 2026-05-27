@@ -1,0 +1,14 @@
+Interpretation for the report/code comments:
+- Hopper-v4 uses a continuous observation space and a continuous action space.
+- Observation vector shape: (11,)
+- Action vector shape: (3,) with bounds in [-1, 1] per action dimension.
+- MuJoCo DOFs: nq=6, nv=6, nu=3
+- Body masses (kg):
+  - world: 0.0
+  - torso: 3.6651914291880923
+  - thigh: 4.057890510886818
+  - leg: 2.7813566959781637
+  - foot: 5.315574769873931
+- Actuator control ranges: [-1.0, 1.0] for all three actuators
+
+Note: gymnasium reported a deprecation warning indicating Hopper-v4 is out of date ( v5 ?). 
