@@ -1,0 +1,10 @@
+run_name,algorithm,episodes,baseline_value,seed,gamma,actor_lr,critic_lr,hidden_size,normalize_advantages,eval_every
+quick_reinforce_no_bl,reinforce,50,,42,0.99,0.0003,0.001,64,False,10
+quick_reinforce_const_bl,reinforce_baseline,50,1000.0,42,0.99,0.0003,0.001,64,False,10
+quick_actor_critic,actor_critic,50,,42,0.99,0.0003,0.001,64,True,10
+phase2_reinforce_bl0_1000,reinforce,1000,,42,0.99,0.0003,0.001,64,False,100
+phase2_reinforce_bl20_1000,reinforce_baseline,1000,20.0,42,0.99,0.0003,0.001,64,False,100
+phase2_reinforce_bl1000_1000,reinforce_baseline,1000,1000.0,42,0.99,0.0003,0.001,64,False,100
+phase2_actor_critic_1000,actor_critic,1000,,42,0.99,0.0003,0.001,64,True,100
+final_reinforce_bl20_15000,reinforce_baseline,15000,20.0,42,0.99,0.0003,0.001,64,False,100
+final_actor_critic_15000,actor_critic,15000,,42,0.99,0.0003,0.001,64,True,100
