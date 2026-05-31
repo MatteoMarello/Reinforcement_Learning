@@ -1,0 +1,46 @@
+% Minimal CVPR-compatible style file for the FAIML RL project report.
+% It follows the public CVPR author-kit layout closely enough for course submission.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cvpr}[2026 Minimal CVPR style]
+\RequirePackage{times}
+\RequirePackage{xspace}
+\RequirePackage[dvipsnames]{xcolor}
+\RequirePackage{graphicx}
+\RequirePackage{amsmath}
+\RequirePackage{amssymb}
+\RequirePackage{booktabs}
+\RequirePackage[numbers,sort&compress]{natbib}
+\RequirePackage[format=plain,labelformat=simple,labelsep=period,font=small,compatibility=false]{caption}
+\RequirePackage[font=footnotesize,skip=3pt,subrefformat=parens]{subcaption}
+\RequirePackage[shortlabels,inline]{enumitem}
+\setlist[itemize]{noitemsep,leftmargin=*,topsep=0em}
+\setlist[enumerate]{noitemsep,leftmargin=*,topsep=0em}
+\setlength{\bibsep}{1pt plus 1pt minus 1pt}
+\DeclareOption{review}{}
+\DeclareOption{final}{}
+\DeclareOption{pagenumbers}{}
+\ProcessOptions\relax
+\setlength{\textheight}{8.875in}
+\setlength{\textwidth}{6.875in}
+\setlength{\columnsep}{0.3125in}
+\setlength{\topmargin}{0in}
+\setlength{\headheight}{0in}
+\setlength{\headsep}{0in}
+\setlength{\parindent}{1pc}
+\setlength{\oddsidemargin}{-0.1875in}
+\setlength{\evensidemargin}{-0.1875in}
+\newcommand{\cvprsection}[1]{\vspace{2pt}\section{#1}\vspace{-2pt}}
+\renewcommand\section{\@startsection {section}{1}{\z@}{-10pt plus -2pt minus -2pt}{7pt}{\large\bf}}
+\renewcommand\subsection{\@startsection {subsection}{2}{\z@}{-8pt plus -2pt minus -2pt}{5pt}{\normalsize\bf}}
+\renewcommand\subsubsection{\@startsection {subsubsection}{3}{\z@}{-6pt plus -2pt minus -2pt}{3pt}{\normalsize\bf}}
+\renewenvironment{abstract}{\centerline{\large\bf Abstract}\vspace*{6pt}\noindent\it\ignorespaces}{\vspace*{8pt}}
+\renewcommand{\textfraction}{0.01}
+\renewcommand{\floatpagefraction}{0.99}
+\renewcommand{\topfraction}{0.99}
+\renewcommand{\bottomfraction}{0.99}
+\setcounter{totalnumber}{99}
+\setcounter{topnumber}{99}
+\setcounter{bottomnumber}{99}
+\makeatletter
+\def\eg{\emph{e.g}.\xspace}\def\ie{\emph{i.e}.\xspace}\def\etal{\emph{et al}.\xspace}
+\makeatother
