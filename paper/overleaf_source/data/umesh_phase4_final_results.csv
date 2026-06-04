@@ -1,7 +1,0 @@
-configuration,training_env,test_env,algorithm,timesteps,episodes,mean_return,std_return,success_rate,notes
-source_to_target_lower_bound,source,target,SAC,500000,50,-2.727340944930911,2.3280959744684955,0.50,Baseline trained on source and tested on target
-target_to_target_upper_bound,target,target,SAC,500000,50,-0.4164593602903187,0.2358108470854857,1.00,Upper bound trained and tested on target
-udr_source_to_source,source,source,SAC,500000,50,-0.49113548044115307,0.5490111775421067,0.98,UDR trained on source with randomized cube mass and tested on source
-udr_source_to_target,source,target,SAC,500000,50,-0.5016606593132019,0.4200815171195696,1.00,UDR trained on source with randomized cube mass and tested on target
-adr_source_to_source,source,source,SAC,500000,50,-1.8827096609398724,1.7952120455412783,0.68,ADR trained on source with adaptive mass randomization and tested on source
-adr_source_to_target,source,target,SAC,500000,50,-1.9204206010326743,1.8931573897670397,0.66,ADR trained on source with adaptive mass randomization and tested on target

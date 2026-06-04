@@ -1,4 +1,0 @@
-timestamp,label,model_path,algorithm,env_type,sampling_strategy,episodes,mean_return,std_return,min_return,max_return,mean_length,std_length,success_rate
-2026-05-19 03:14:08,source_to_source,results/part2/sac_none_source_500k_seed0/final_model.zip,sac,source,none,50,-2.2758887598291038,2.083051584386646,-5.714064974337816,-0.020837999880313873,26.66,22.62530441784154,0.52
-2026-05-19 03:14:15,source_to_target_lower_bound,results/part2/sac_none_source_500k_seed0/final_model.zip,sac,target,none,50,-2.073325861468911,1.9795762435238118,-6.368185877799988,-0.02070000022649765,24.88,21.7519102609403,0.58
-2026-05-19 03:14:19,target_to_target_upper_bound,results/part2/sac_none_target_500k_seed0/final_model.zip,sac,target,none,50,-0.4746011402830482,0.28430596520456886,-1.1673549860715866,-0.022738000378012657,5.96,2.877220881336711,1.0
