@@ -1,548 +1,112 @@
 # Reinforcement Learning for Robotic Control under Sim-to-Sim Domain Shift
 
-Public repository for the **Fundamentals of Artificial Intelligence, Machine and Deep Learning** Reinforcement Learning project, AY 2025/2026, Politecnico di Torino.
+Team course project, *Fundamentals of Artificial Intelligence, Machine and Deep Learning*, Politecnico di Torino,
+AY 2025/26. Four authors: Samuel Clemos, Matteo Marello, Shaheer Abdullah, Umesh Bansari.
+The course report (CVPR LaTeX template; a course deliverable, not a peer-reviewed publication) is the PDF in the
+repository root.
 
-**Group 68 — Reinforcement Learning**
+**Question.** A policy trained on one simulated dynamics setting is deployed on another. How much performance is
+lost, and how much of it does domain randomization recover?
 
-| Student | Student ID | Role |
-|---|---:|---|
-| Samuel Clemos | 362643 | Phase 1/2: Hopper, REINFORCE, baseline, Actor-Critic |
-| Matteo Marello | 359719 | Paper, integration, final consistency checks |
-| Shaheer Abdullah | 353868 | Phase 3: PPO/SAC baselines |
-| Umesh Bansari | 351863 | Phase 4: UDR/ADR Domain Randomization |
+**Setup.** PandaPush-v3 (panda-gym, PyBullet). Source domain: 1 kg cube. Target domain: 5 kg cube. SAC
+(Stable-Baselines3), 500k timesteps, training seed 0, 50 deterministic evaluation episodes. Lower bound:
+trained on source, tested on target. Upper bound: trained and tested on target. Domain randomization over cube mass:
+UDR (uniform, [0.5, 8.0] kg) and ADR (boundaries adapted from recent performance). A preliminary part implements
+REINFORCE, REINFORCE with a constant baseline and Actor-Critic from scratch on Hopper-v4 (MuJoCo).
 
-GitHub repository: <https://github.com/MatteoMarello/Reinforcement_Learning>
+## Results
 
----
+Final submitted table (`results/part2/summaries/umesh_phase4_final_results.csv`), single training seed:
 
-## 1. Project overview
+| Configuration | Mean return | Std | Success rate |
+|---|---:|---:|---:|
+| source → target (lower bound) | -2.727 | 2.328 | 0.50 |
+| target → target (upper bound) | -0.416 | 0.236 | 1.00 |
+| UDR, source → target | -0.502 | 0.420 | 1.00 |
+| ADR, source → target | -1.920 | 1.893 | 0.66 |
 
-This project studies **Reinforcement Learning (RL) for robotic control** and the **sim-to-real transfer problem** in a simplified sim-to-sim setting.
+### Follow-up: how stable are these numbers? (added November 2026, after submission)
 
-The project is divided into four phases:
+The group's evaluation log contains three complete evaluation batches of the 500k matrix (20, 25 and 26 May 2026,
+50 episodes each); the table above reports the last one. Pooling them
+([`followup/evaluation_variability.py`](followup/evaluation_variability.py), no new runs):
 
-1. **Preliminaries**  
-   Understand the core RL framework, the agent-environment loop, robotic control tasks, and the sim-to-real problem.
+![Per-batch and pooled success rates](followup/results/evaluation_variability_500k.png)
 
-2. **Train basic RL agents from scratch**  
-   Implement and compare basic policy-gradient algorithms on the `Hopper-v4` MuJoCo environment:
-   - REINFORCE without baseline;
-   - REINFORCE with a constant scalar baseline;
-   - Actor-Critic.
+| Configuration | Success per batch | Pooled (Wilson 95% CI) |
+|---|---|---|
+| source → target (lower bound) | 0.52 / 0.56 / 0.50 | 0.53 [0.45, 0.60] |
+| target → target (upper bound) | 1.00 / 1.00 / 1.00 | 1.00 [0.98, 1.00] |
+| UDR, source → target | 1.00 / 0.98 / 1.00 | 0.99 [0.96, 1.00] |
+| ADR, source → target | 0.52 / 0.52 / 0.66 | 0.57 [0.49, 0.64] |
 
-3. **Lower/upper bound baselines on PandaPush**  
-   Use Stable-Baselines3 to train advanced RL agents on a PandaPush robotic manipulation task:
-   - PPO;
-   - SAC;
-   - source-to-source evaluation;
-   - source-to-target lower-bound evaluation;
-   - target-to-target upper-bound evaluation.
+Reading:
 
-4. **Domain Randomization**  
-   Implement and evaluate:
-   - Uniform Domain Randomization (UDR);
-   - Automatic Domain Randomization (ADR).
+- **UDR closes the transfer gap** in every batch; its interval does not overlap the lower bound's.
+- **The ADR improvement is not supported.** The 0.66 in the final table is the most favourable of three batches; the
+  pooled ADR rate is within noise of the unadapted baseline. The report's ADR-over-baseline claim should be read as
+  inconclusive.
+- **Why batches differ:** `part2/eval_sb3.py` seeds the action space but not `env.reset()`, so each evaluation
+  draws different initial states. The log stores checkpoint paths, not hashes, so it cannot rule out that a checkpoint
+  was retrained between batches; the spread may include training-run variance.
+- All results use one training seed. Seed-to-seed training variance is not measured.
 
-The source and target PandaPush environments differ in the cube mass:
+A seeded re-evaluation of the released checkpoints is prepared in
+[`followup/reevaluate_checkpoints.py`](followup/reevaluate_checkpoints.py) (fixed per-episode reset seeds, 5 × 50
+episodes per configuration). **It has not been run yet**: PyBullet has no prebuilt Windows wheel for current Python
+versions, and the run is pending on a Linux/Colab machine.
 
-| Environment | Cube mass |
-|---|---:|
-| Source | 1 kg |
-| Target | 5 kg |
+### Hopper (from-scratch policy gradients)
 
-This manually introduced mismatch simulates a **reality gap**. The goal of Domain Randomization is to train policies that remain robust when transferred from the source domain to the target domain.
+`samuel_part/reports/comparison_metrics.csv`, seed 42:
 
----
+| Run | Episodes | Best eval return | Final eval return |
+|---|---:|---:|---:|
+| REINFORCE | 1000 | 346.7 | 243.2 |
+| REINFORCE, baseline 20 | 1000 | 223.2 | 219.7 |
+| REINFORCE, baseline 1000 | 1000 | 181.0 | 97.8 |
+| Actor-Critic | 1000 | 466.2 | 466.2 |
+| REINFORCE, baseline 20 | 15000 | 444.3 | 321.3 |
+| Actor-Critic | 15000 | 1010.4 | 168.0 |
 
-## 2. Repository structure
+Actor-Critic learns fastest but the long run collapses after its peak; an oversized constant baseline (1000) distorts
+the advantage and slows learning.
 
-```text
-Reinforcement_Learning-main/
-├── README.md
-├── requirements.txt
-├── paper/
-│   ├── 68_RL_s362643_s359719_s353868_s351863_Clemos_Marello_Abdullah_Bansari.pdf
-│   └── overleaf_source/
-├── PHASE_1_2_COMPLETED.md
-├── PHASE_3_4_COMPLETED.md
-│
-├── part1/
-│   ├── agent.py                 # REINFORCE, baseline REINFORCE, Actor-Critic
-│   ├── train.py                 # Hopper training loop
-│   ├── evaluate.py              # Hopper checkpoint evaluation
-│   ├── analyze_hopper.py        # Hopper environment inspection
-│   ├── plot_results.py          # Hopper learning-curve plotting
-│   ├── test_random_policy.py
-│   └── colab_template/
-│
-├── part2/
-│   ├── env_utils.py             # PandaPush environment/model utilities
-│   ├── train_sb3.py             # PPO/SAC training with Stable-Baselines3
-│   ├── eval_sb3.py              # PPO/SAC evaluation over N episodes
-│   ├── inspect_push.py          # Source/target mass inspection
-│   ├── rand_wrapper.py          # UDR/ADR wrappers
-│   ├── run_part2_experiments.py # Standard Phase 3/4 experiment launcher
-│   ├── plot_part2_results.py
-│   └── panda-gym/               # Bundled PandaGym implementation
-│
-├── samuel_part/
-│   ├── logs/
-│   ├── plots/
-│   └── reports/
-│       ├── comparison_metrics.csv
-│       ├── hyperparameters_used.csv
-│       └── SAMUEL_PHASE1_2_REPORT.md
-│
-├── shaheer_phase3_100k_deliverables/
-├── shaheer_phase3_500k_sac_final/
-├── shaheer_phase3_reproducibility/
-│
-└── results/
-    └── part2/
-        ├── sac_udr_source_500k_seed0/
-        ├── sac_adr_source_500k_seed0/
-        └── summaries/
-            ├── umesh_phase4_final_results.csv
-            ├── umesh_phase4_notes.txt
-            ├── sac_phase3_phase4_summary_seed0.csv
-            └── sac_phase3_phase4_summary_seed0.png
-```
+## Repository layout
 
----
+| Path | Content |
+|---|---|
+| `part1/` | REINFORCE / baseline / Actor-Critic (`agent.py`), Hopper training and evaluation |
+| `part2/` | SB3 training/evaluation for PandaPush, UDR/ADR wrapper (`rand_wrapper.py`), experiment launcher; bundled `panda-gym` (MIT) |
+| `samuel_part/` | Hopper results, plots, hyperparameters |
+| `shaheer_phase3_*` | PPO/SAC 100k comparison, SAC 500k baselines, source/target checkpoints |
+| `results/part2/` | UDR/ADR checkpoints and the full evaluation log |
+| `followup/` | Post-submission analysis (this README's follow-up section) |
+| `docs/DETAILED_GUIDE.md` | Full submission README: every command, hyperparameter and result path |
 
-## 3. Installation
-
-A clean Python environment is recommended.
+## Reproduce
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
+python -m venv .venv && source .venv/bin/activate      # Python 3.10/3.11, Linux or Colab recommended
 pip install -r requirements.txt
+pip install -e part2/panda-gym
+python -m py_compile part1/*.py part2/*.py              # syntax check
+python part2/run_part2_experiments.py --algorithm sac --include-udr --include-adr --dry-run   # print the matrix
+python followup/evaluation_variability.py               # recompute the follow-up table from the log
 ```
 
-The project uses a bundled version of PandaGym for the PandaPush task. Install it in editable mode:
+Full training commands are in [`docs/DETAILED_GUIDE.md`](docs/DETAILED_GUIDE.md). 500k SAC runs take several hours
+each on a CPU.
 
-```bash
-cd part2/panda-gym
-pip install -e .
-cd ../..
-```
+## Contributions
 
-If `pybullet` installation fails on a local machine, use Python 3.10/3.11 or run the PandaPush experiments on Google Colab.
+Per the team's role assignment: Samuel Clemos, Hopper policy-gradient algorithms (Phases 1–2); Shaheer Abdullah,
+PPO/SAC baselines (Phase 3); Umesh Bansari, UDR/ADR domain randomization (Phase 4); Matteo Marello, report writing,
+code integration and final consistency checks. Commit history: the initial pipeline scaffold (`ce633c0`) and the
+final integration (`ef946ae`) were committed by Matteo; each phase's results were committed by the teammate who ran
+them. The `followup/` analysis was added by Matteo after the course, with AI assistance (Claude Code).
 
----
+## Limitations
 
-## 4. Quick sanity checks
-
-Run these commands from the repository root.
-
-### Compile all project scripts
-
-```bash
-python -m py_compile part1/*.py part2/*.py
-```
-
-### Inspect Hopper
-
-```bash
-python part1/analyze_hopper.py
-```
-
-Expected conceptual result:
-
-- continuous observation space;
-- continuous action space;
-- action dimension equal to 3;
-- MuJoCo body masses, degrees of freedom, and actuator information printed.
-
-### Inspect PandaPush source/target environments
-
-```bash
-python part2/inspect_push.py --env-type both
-```
-
-Expected conceptual result:
-
-- source cube mass: 1 kg;
-- target cube mass: 5 kg;
-- continuous action space;
-- goal-conditioned dictionary observation.
-
-### Dry-run the Phase 3/4 launcher
-
-```bash
-python part2/run_part2_experiments.py --algorithm sac --include-udr --include-adr --dry-run
-```
-
-This prints the training and evaluation commands without running the full experiments.
-
----
-
-## 5. Phase 1/2 — Hopper from-scratch algorithms
-
-### Implemented algorithms
-
-The following methods are implemented from scratch in `part1/agent.py`:
-
-- `reinforce`;
-- `reinforce_baseline`;
-- `actor_critic`.
-
-Training is handled by `part1/train.py`.
-
-### Example training commands
-
-REINFORCE without baseline:
-
-```bash
-python part1/train.py \
-  --algorithm reinforce \
-  --episodes 1000 \
-  --seed 42 \
-  --eval-every 100 \
-  --run-name phase2_reinforce_bl0_1000
-```
-
-REINFORCE with constant baseline 20:
-
-```bash
-python part1/train.py \
-  --algorithm reinforce_baseline \
-  --baseline-value 20 \
-  --episodes 1000 \
-  --seed 42 \
-  --eval-every 100 \
-  --run-name phase2_reinforce_bl20_1000
-```
-
-Actor-Critic:
-
-```bash
-python part1/train.py \
-  --algorithm actor_critic \
-  --normalize-advantages \
-  --episodes 1000 \
-  --seed 42 \
-  --eval-every 100 \
-  --run-name phase2_actor_critic_1000
-```
-
-Long final runs:
-
-```bash
-python part1/train.py \
-  --algorithm reinforce_baseline \
-  --baseline-value 20 \
-  --episodes 15000 \
-  --seed 42 \
-  --eval-every 100 \
-  --run-name final_reinforce_bl20_15000
-
-python part1/train.py \
-  --algorithm actor_critic \
-  --normalize-advantages \
-  --episodes 15000 \
-  --seed 42 \
-  --eval-every 100 \
-  --run-name final_actor_critic_15000
-```
-
-### Official Phase 1/2 results
-
-Official aggregate results are stored in:
-
-```text
-samuel_part/reports/comparison_metrics.csv
-samuel_part/reports/hyperparameters_used.csv
-samuel_part/plots/
-```
-
-Higher return is better.
-
-| Run | Algorithm | Episodes | Baseline | Best eval return | Final eval return |
-|---|---|---:|---:|---:|---:|
-| `phase2_reinforce_bl0_1000` | REINFORCE | 1000 | - | 346.675 | 243.164 |
-| `phase2_reinforce_bl20_1000` | REINFORCE + baseline | 1000 | 20 | 223.212 | 219.723 |
-| `phase2_reinforce_bl1000_1000` | REINFORCE + baseline | 1000 | 1000 | 181.041 | 97.763 |
-| `phase2_actor_critic_1000` | Actor-Critic | 1000 | - | 466.191 | 466.191 |
-| `final_reinforce_bl20_15000` | REINFORCE + baseline | 15000 | 20 | 444.293 | 321.348 |
-| `final_actor_critic_15000` | Actor-Critic | 15000 | - | 1010.380 | 168.042 |
-
-Main interpretation:
-
-- Actor-Critic performs best in the 1000-episode comparison and reaches the highest peak evaluation.
-- The long Actor-Critic run is unstable: it reaches a high best evaluation return, but its final evaluation return drops.
-- REINFORCE with baseline 20 gives a more stable final long-run result than the long Actor-Critic run.
-- A very large baseline value such as 1000 hurts the REINFORCE update because it distorts the advantage signal.
-
----
-
-## 6. Phase 3 — PPO/SAC lower and upper bound baselines
-
-### Implemented pipeline
-
-Phase 3 is implemented with Stable-Baselines3 in:
-
-```text
-part2/train_sb3.py
-part2/eval_sb3.py
-part2/run_part2_experiments.py
-```
-
-The task is `PandaPush-v3`, using:
-
-- dense reward;
-- end-effector control;
-- deterministic evaluation;
-- 50 evaluation episodes;
-- training seed 0;
-- evaluation seed 1234.
-
-### PPO/SAC 100k comparison
-
-The 100k PPO/SAC comparison is stored in:
-
-```text
-shaheer_phase3_100k_deliverables/
-```
-
-Commands used:
-
-```bash
-python part2/run_part2_experiments.py --algorithm sac --timesteps 100000 --episodes 50
-python part2/run_part2_experiments.py --algorithm ppo --timesteps 100000 --episodes 50
-```
-
-At 100k timesteps, SAC showed better transfer performance than PPO in the source-to-target setting, so SAC was selected for the final 500k baseline and for the Domain Randomization phase.
-
-### Official Phase 3 SAC 500k results
-
-Official Phase 3 500k SAC results are stored in:
-
-```text
-shaheer_phase3_500k_sac_final/sac_phase3_phase4_summary_seed0.csv
-shaheer_phase3_500k_sac_final/sac_500k_phase3_baselines.png
-shaheer_phase3_reproducibility/checkpoints/
-```
-
-Command used:
-
-```bash
-python part2/run_part2_experiments.py --algorithm sac --timesteps 500000 --episodes 50
-```
-
-Higher return is better, i.e. less negative values are better.
-
-| Configuration | Mean return | Std return | Success rate |
-|---|---:|---:|---:|
-| source → source | -2.2759 | 2.0831 | 0.52 |
-| source → target | -2.0733 | 1.9796 | 0.58 |
-| target → target | -0.4746 | 0.2843 | 1.00 |
-
-Interpretation:
-
-- `source → target` is the lower-bound sim-to-sim transfer setting.
-- `target → target` is the upper-bound setting because the agent is trained directly on the target dynamics.
-- The target-trained policy reaches perfect success rate, showing that the target environment can be solved by SAC when training directly on it.
-- The source-trained policy transfers partially, but remains far from the target-trained upper bound in success rate and return.
-
----
-
-## 7. Phase 4 — Domain Randomization
-
-### Implemented methods
-
-Domain Randomization is implemented in:
-
-```text
-part2/rand_wrapper.py
-part2/train_sb3.py
-```
-
-Two methods are supported:
-
-- **UDR — Uniform Domain Randomization**  
-  A new cube mass is sampled at reset time from a fixed uniform range.
-
-- **ADR — Automatic Domain Randomization**  
-  The mass interval adapts based on recent performance near the current domain boundaries.
-
-The final SAC runs use:
-
-| Parameter | Value |
-|---|---:|
-| Algorithm | SAC |
-| Timesteps | 500,000 |
-| Evaluation episodes | 50 |
-| Seed | 0 |
-| UDR mass range | [0.5, 8.0] kg |
-| Source mass | 1 kg |
-| Target mass | 5 kg |
-
-The UDR range is broad and is not a narrow distribution centered only around the target mass.
-
-### Example commands
-
-Train SAC with UDR:
-
-```bash
-python part2/train_sb3.py \
-  --algorithm sac \
-  --env-type source \
-  --sampling-strategy udr \
-  --timesteps 500000 \
-  --mass-range 0.5 8.0 \
-  --seed 0 \
-  --run-name sac_udr_source_500k_seed0
-```
-
-Train SAC with ADR:
-
-```bash
-python part2/train_sb3.py \
-  --algorithm sac \
-  --env-type source \
-  --sampling-strategy adr \
-  --timesteps 500000 \
-  --mass-range 0.5 8.0 \
-  --seed 0 \
-  --run-name sac_adr_source_500k_seed0
-```
-
-The full matrix can also be launched with:
-
-```bash
-python part2/run_part2_experiments.py \
-  --algorithm sac \
-  --timesteps 500000 \
-  --episodes 50 \
-  --include-udr \
-  --include-adr
-```
-
-### Official Phase 4 results
-
-Official cleaned Phase 4 results are stored in:
-
-```text
-results/part2/summaries/umesh_phase4_final_results.csv
-results/part2/summaries/umesh_phase4_notes.txt
-results/part2/sac_udr_source_500k_seed0/
-results/part2/sac_adr_source_500k_seed0/
-```
-
-Higher return is better, i.e. less negative values are better.
-
-| Configuration | Mean return | Std return | Success rate |
-|---|---:|---:|---:|
-| source → target baseline | -2.7273 | 2.3281 | 0.50 |
-| target → target upper bound | -0.4165 | 0.2358 | 1.00 |
-| UDR source → source | -0.4911 | 0.5490 | 0.98 |
-| UDR source → target | -0.5017 | 0.4201 | 1.00 |
-| ADR source → source | -1.8827 | 1.7952 | 0.68 |
-| ADR source → target | -1.9204 | 1.8932 | 0.66 |
-
-Main interpretation:
-
-- UDR gives the best transfer performance in this project.
-- UDR improves source-to-target success rate from 0.50 to 1.00.
-- UDR matches the target-trained upper bound in success rate and achieves a mean return close to the target-trained upper-bound return.
-- ADR improves over the source-to-target baseline but is weaker than UDR in this run.
-- A likely reason is that ADR did not expand its adaptive mass interval quickly or effectively enough, whereas UDR exposed the policy to a broad fixed range of masses throughout training.
-
----
-
-## 8. Final paper
-
-The final report is written using the CVPR LaTeX template. A copy of the compiled PDF and the Overleaf/LaTeX sources are included in this repository under `paper/`.
-
-The PDF must also be submitted separately on the course portal.
-
-Report filename:
-
-```text
-68_RL_s362643_s359719_s353868_s351863_Clemos_Marello_Abdullah_Bansari.pdf
-```
-
-The report contains:
-
-- abstract with GitHub repository link;
-- introduction;
-- related work;
-- methodology;
-- experimental results;
-- discussion;
-- conclusion;
-- references.
-
-The paper uses the official result files listed above and does not introduce unsupported numerical claims.
-
-Paper files:
-
-```text
-paper/68_RL_s362643_s359719_s353868_s351863_Clemos_Marello_Abdullah_Bansari.pdf
-paper/overleaf_source/main.tex
-paper/overleaf_source/main.bib
-paper/overleaf_source/figures/
-paper/overleaf_source/data/
-```
-
----
-
-## 9. Reproducibility notes
-
-### Important result files
-
-| Purpose | Path |
-|---|---|
-| Hopper official metrics | `samuel_part/reports/comparison_metrics.csv` |
-| Hopper hyperparameters | `samuel_part/reports/hyperparameters_used.csv` |
-| Hopper plots | `samuel_part/plots/` |
-| PPO/SAC 100k comparison | `shaheer_phase3_100k_deliverables/` |
-| SAC 500k Phase 3 results | `shaheer_phase3_500k_sac_final/` |
-| SAC 500k checkpoints | `shaheer_phase3_reproducibility/checkpoints/` |
-| UDR/ADR official final table | `results/part2/summaries/umesh_phase4_final_results.csv` |
-| UDR/ADR final models | `results/part2/sac_udr_source_500k_seed0/`, `results/part2/sac_adr_source_500k_seed0/` |
-
-### Evaluation protocol
-
-| Phase | Metric protocol |
-|---|---|
-| Hopper | Deterministic evaluation during training; aggregate metrics in Samuel's CSV |
-| PPO/SAC | 50 deterministic evaluation episodes |
-| UDR/ADR | 50 deterministic evaluation episodes |
-
-### Known limitations
-
-- Most experiments use a single main seed due to compute limitations.
-- Training RL agents is stochastic, so rerunning the same commands can produce slightly different values.
-- The final paper uses cleaned official CSV tables rather than all intermediate smoke-test outputs.
-- Some intermediate paths in older summary CSV files may refer to run directories not included in the final compact repository. The official paths are the ones listed in this README.
-
----
-
-## 10. Authors
-
-| Name | Student ID | Email |
-|---|---:|---|
-| Samuel Clemos | 362643 | s362643@studenti.polito.it |
-| Matteo Marello | 359719 | s359719@studenti.polito.it |
-| Shaheer Abdullah | 353868 | s353868@studenti.polito.it |
-| Umesh Bansari | 351863 | s351863@studenti.polito.it |
-
----
-
-## 11. Citation and references used in the report
-
-The report discusses and cites the literature provided in the project assignment, including:
-
-- Sutton and Barto, *Reinforcement Learning: An Introduction*;
-- Kober, Bagnell, and Peters, *Reinforcement Learning in Robotics: A Survey*;
-- Schulman et al., *Proximal Policy Optimization Algorithms*;
-- Haarnoja et al., *Soft Actor-Critic*;
-- Tobin et al., *Domain Randomization for Transferring Deep Neural Networks from Simulation to the Real World*;
-- Peng et al., *Sim-to-Real Transfer of Robotic Control with Dynamics Randomization*;
-- Rubik's Cube / Automatic Domain Randomization work by OpenAI et al.
-
-For the complete bibliography, see the final CVPR-style PDF report.
+One training seed; 50-episode evaluations with unseeded resets; a single dynamics parameter (cube mass) is shifted;
+sim-to-sim only, with no claim about real-robot transfer.
