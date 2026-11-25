@@ -51,6 +51,10 @@ Reading:
   was retrained between batches; the spread may include training-run variance.
 - The training logs agree: over the last 10 in-training evaluations on the target domain (200 episodes,
   [`followup/training_curves.py`](followup/training_curves.py)), UDR succeeds in 0.96 of episodes and ADR in 0.53.
+  ADR's curve is still rising at 500k steps, so the data say that ADR had not caught up within this budget, not that
+  it cannot.
+
+![Target success during training](followup/results/training_target_success.png)
 - All results use one training seed. Seed-to-seed training variance is not measured.
 
 A seeded re-evaluation of the released checkpoints is prepared in
