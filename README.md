@@ -49,6 +49,8 @@ Reading:
 - **Why batches differ:** `part2/eval_sb3.py` seeds the action space but not `env.reset()`, so each evaluation
   draws different initial states. The log stores checkpoint paths, not hashes, so it cannot rule out that a checkpoint
   was retrained between batches; the spread may include training-run variance.
+- The training logs agree: over the last 10 in-training evaluations on the target domain (200 episodes,
+  [`followup/training_curves.py`](followup/training_curves.py)), UDR succeeds in 0.96 of episodes and ADR in 0.53.
 - All results use one training seed. Seed-to-seed training variance is not measured.
 
 A seeded re-evaluation of the released checkpoints is prepared in
@@ -93,6 +95,7 @@ pip install -e part2/panda-gym
 python -m py_compile part1/*.py part2/*.py              # syntax check
 python part2/run_part2_experiments.py --algorithm sac --include-udr --include-adr --dry-run   # print the matrix
 python followup/evaluation_variability.py               # recompute the follow-up table from the log
+python followup/training_curves.py                      # target success during training (UDR vs ADR)
 ```
 
 Full training commands are in [`docs/DETAILED_GUIDE.md`](docs/DETAILED_GUIDE.md). 500k SAC runs take several hours
