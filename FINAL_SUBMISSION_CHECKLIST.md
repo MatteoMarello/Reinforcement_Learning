@@ -44,7 +44,7 @@ The paper PDF has 5 pages including references and is formatted with the CVPR-st
 3. Submit the PDF named:
 
 ```text
-68_RL_s362643_s359719_s353868_s351863_Clemos_Marello_Abdullah_Bansari.pdf
+course_report.pdf
 ```
 
 4. Confirm that the public GitHub link in the report abstract points to the final repository.
